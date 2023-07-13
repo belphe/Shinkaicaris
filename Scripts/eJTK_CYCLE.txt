@@ -1,0 +1,18 @@
+## [Shell + Python2.7] eJTK_CYCLE
+## https://github.com/alanlhutchison/empirical-JTK_CYCLE-with-asymmetry
+
+## detect rhythmic transcripts with a cosine waveform and a periodicity of 8, 12, 16, 20, 24, and 28 hours
+./eJTK-CalcP.py -f ceemdan/Ceemdan_IMFs.txt -w ref_files/waveform_cosine.txt -p ref_files/period8.txt -s ref_files/phases_00-04_by4.txt -a ref_files/asymmetries_04.txt -x p8_cosine
+./eJTK-CalcP.py -f ceemdan/Ceemdan_IMFs.txt -w ref_files/waveform_cosine.txt -p ref_files/period12.txt -s ref_files/phases_00-08_by4.txt -a ref_files/asymmetries_04-08_by4.txt -x p12_cosine
+./eJTK-CalcP.py -f ceemdan/Ceemdan_IMFs.txt -w ref_files/waveform_cosine.txt -p ref_files/period16.txt -s ref_files/phases_00-12_by4.txt -a ref_files/asymmetries_04-12_by4.txt -x p16_cosine
+./eJTK-CalcP.py -f ceemdan/Ceemdan_IMFs.txt -w ref_files/waveform_cosine.txt -p ref_files/period20.txt -s ref_files/phases_00-16_by4.txt -a ref_files/asymmetries_04-16_by4.txt -x p20_cosine
+./eJTK-CalcP.py -f ceemdan/Ceemdan_IMFs.txt -w ref_files/waveform_cosine.txt -p ref_files/period24.txt -s ref_files/phases_00-20_by4.txt -a ref_files/asymmetries_04-20_by4.txt -x p24_cosine
+./eJTK-CalcP.py -f ceemdan/Ceemdan_IMFs.txt -w ref_files/waveform_cosine.txt -p ref_files/period28.txt -s ref_files/phases_00-24_by4.txt -a ref_files/asymmetries_04-24_by4.txt -x p28_cosine
+
+## detect rhythmic transcripts with a trough waveform and a periodicity of 8, 12, 16, 20, 24, and 28 hours
+./eJTK-CalcP.py -f ceemdan/Ceemdan_IMFs.txt -w ref_files/waveform_trough.txt -p ref_files/period8.txt -s ref_files/phases_00-04_by4.txt -a ref_files/asymmetries_04.txt -x p8_trough
+./eJTK-CalcP.py -f ceemdan/Ceemdan_IMFs.txt -w ref_files/waveform_trough.txt -p ref_files/period12.txt -s ref_files/phases_00-08_by4.txt -a ref_files/asymmetries_04-08_by4.txt -x p12_trough
+./eJTK-CalcP.py -f ceemdan/Ceemdan_IMFs.txt -w ref_files/waveform_trough.txt -p ref_files/period16.txt -s ref_files/phases_00-12_by4.txt -a ref_files/asymmetries_04-12_by4.txt -x p16_trough
+./eJTK-CalcP.py -f ceemdan/Ceemdan_IMFs.txt -w ref_files/waveform_trough.txt -p ref_files/period20.txt -s ref_files/phases_00-16_by4.txt -a ref_files/asymmetries_04-16_by4.txt -x p20_trough
+./eJTK-CalcP.py -f ceemdan/Ceemdan_IMFs.txt -w ref_files/waveform_trough.txt -p ref_files/period24.txt -s ref_files/phases_00-20_by4.txt -a ref_files/asymmetries_04-20_by4.txt -x p24_trough
+./eJTK-CalcP.py -f ceemdan/Ceemdan_IMFs.txt -w ref_files/waveform_trough.txt -p ref_files/period28.txt -s ref_files/phases_00-24_by4.txt -a ref_files/asymmetries_04-24_by4.txt -x p28_trough

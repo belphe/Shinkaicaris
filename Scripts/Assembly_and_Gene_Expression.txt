@@ -1,0 +1,72 @@
+## [Shell] Trim raw reads with Trimmomatic v0.39
+for i in */;
+	do j=$(echo $i| sed 's/\///')
+	echo $j
+	cd $j
+	FQ1=$(find *_1.fq.gz)
+	FQ2=$(find *_2.fq.gz)
+	P1="$j""_trim_1.fq"
+	S1="$j""_SE1.fq"
+	P2="$j""_trim_2.fq"
+	S2="$j""_SE2.fq"
+	java -jar /home/share/Trimmomatic-0.39/trimmomatic-0.39.jar PE -phred33 -threads 10 $FQ1 $FQ2 $P1 $S1 $P2 $S2 ILLUMINACLIP:/home/share/Trimmomatic-0.39/adap
+ters/TruSeq3-PE-2.fa:2:30:10 LEADING:10 TRAILING:10 SLIDINGWINDOW:4:15 MINLEN:50 
+	rm S1
+	rm S2
+	cp $P1 ~/Data/Chronobiology/Trimmomatic/leading
+	cp $P2 ~/Data/Chronobiology/Trimmomatic/trailing
+	cd ..
+done
+
+## [Shell] Combine the trimmed paired-end reads
+cat ~/Data/Chronobiology/Trimmomatic/leading/* > total1.fq
+cat ~/Data/Chronobiology/Trimmomatic/trailing/* > total2.fq
+
+## [Shell] Classify the shrimp reads and bacteria reads with Kraken2 v2.0.8
+kraken2 -db minikraken2_v1_8GB --threads 10 --paired total1.fq total2.fq --classified-out total_Bac#.fq --unclassified-out total_Host#.fq
+
+## [Shell] De novo transcriptome assembly using Trinity v2.11.0
+Trinity --seqType fq --max_memory 320G --left total_Host_1.fq  --right total_Host_2.fq --CPU 12 --min_contig_length 300 --jaccard_clip
+
+## [Shell] Quantify each transcript expression using Salmon v1.4.0
+salmon index -t Trinity_jaccard.fasta -i transcripts_index -p 20
+salmon quant -i transcripts_index --libType IU -1 total_Host_1.fq -2 total_Host_2.fq -p 40 -o salmon_quant
+
+## [Python] Filter transcripts by keeping the highest expressed isoforms to build a less-redundant transcriptome
+python quant_highest_expressed_isoform_out.py
+python fasta_highest_expressed_isoform_out.py
+
+## [Shell] Using TransDecoder v5.5.0 to identify candidate coding regions within transcripts
+TransDecoder.LongOrfs -t Trinity_jaccard_highest_expressed_isoforms.fasta -m 100
+TransDecoder.Predict -t Trinity_jaccard_highest_expressed_isoforms.fasta --single_best_only
+
+## [Python] Take out complete transcripts with coding regions
+python transdecoder_cds_out.py
+
+## [Shell] Check the transcriptome completeness with BUSCO v5.0.0
+busco -m transcriptome -i Trinity_jaccard.fasta -l ~/Database/busco_db/metazoa_odb10 -o Trinity_jaccard_busco -c 20 --offline
+busco -m transcriptome -i Trinity_jaccard_highest_expressed_isoforms.fasta -l ~/Database/busco_db/metazoa_odb10 -o Trinity_jaccard_highest_expressed_isoforms_busco -c 20 --offline
+busco -m transcriptome -i Assembled_transcriptome.fasta -l ~/Database/busco_db/metazoa_odb10 -o Assembled_transcriptome_busco -c 20 --offline
+
+## [Shell] Quantify the gene expression of each sample using Salmon v1.4.0
+salmon index -t Assembled_transcriptome.fasta -i transcripts_index -p 20
+for i in */;
+	do j=$(echo $i| sed 's/\///')
+	echo $j
+	cd $j
+	P1=$(find *trim_1.fq)
+	P2=$(find *trim_2.fq)
+	salmon quant -i transcripts_index --libType IU -1 $P1 -2 $P2 -p 20 -o salmon_quant
+	cd salmon_quant
+	mv quant.sf "$j""_quant.sf" 
+	mv *.sf ~/Data/Chronobiology/TPM_TMM
+	cd ..
+	rm $P1
+	rm $P2
+	rm -rf salmon_quant
+	echo "$j""_quant.sf" >> ~/Data/Chronobiology/TPM_TMM/all_quant_files.txt
+	cd ..
+done
+
+## [Shell] TMM-normalized expression quantification method using perl script provided by Trinity
+/home/share/trinityrnaseq-v2.11.0/util/abundance_estimates_to_matrix.pl --est_method salmon  --gene_trans_map none --out_prefix salmon --quant_files all_quant_files.txt
